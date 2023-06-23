@@ -1,5 +1,4 @@
 import 'package:app_test/src/app/ui/controller/session_ctr.dart';
-import 'package:app_test/src/app/ui/view/register/complete_register.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -153,7 +152,8 @@ class LoginScreen extends StatelessWidget {
                   color: AppAssets.tertiaryColor),
             ),
           ),
-          CustomButton(
+          Obx(
+            () => CustomButton(
               label: "Iniciar",
               margin: const EdgeInsets.symmetric(vertical: 15.0),
               constraints: const BoxConstraints(maxWidth: 300.0),
@@ -161,7 +161,9 @@ class LoginScreen extends StatelessWidget {
               onPressed: (_sharedController.findErrorMessage("email") != null ||
                       _sharedController.findErrorMessage("password") != null)
                   ? null
-                  : () => _screenController.logIn()),
+                  : () => _screenController.logIn(),
+            ),
+          )
         ],
       ),
     ));

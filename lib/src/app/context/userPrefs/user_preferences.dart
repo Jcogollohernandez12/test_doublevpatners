@@ -11,20 +11,12 @@ class UserPreferences {
   UserPreferences._internal();
   SharedPreferences? _prefs;
 
-  void setBool(String key, bool value) {
-    _prefs!.setBool(key, value);
-  }
-
   void setString(String key, String value) {
     _prefs!.setString(key, value);
   }
 
   String getString(String key) {
     return _prefs!.getString(key) ?? "";
-  }
-
-  bool getBool(String key) {
-    return _prefs!.getBool(key) ?? false;
   }
 
   void removeKey(String key) {

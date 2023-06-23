@@ -6,6 +6,7 @@ import 'package:app_test/src/app/ui/view/login/login_view.dart';
 import 'package:app_test/src/app/ui/view/register/complete_register.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/models/auth_credentials.dart';
@@ -33,20 +34,64 @@ class SessionController extends GetxController {
 
   RxBool isObscured = true.obs;
 
+  RxList<dynamic> address_user = [].obs;
+
   User? user;
+  Map<String, dynamic> dataMap = {};
 
   void logIn() async {
     _sharedController.setLoading(true);
     final isLogin = await signInWithEmailAndPassword();
-    if (isLogin) {
+    if (isLogin.contains('true')) {
+      await getDocumentById(user?.uid ?? '');
       Get.offAllNamed(HomePage.routeName);
+    } else {
+      if (isLogin.contains("Given String is empty or null")) {
+        _sharedController.showDialogMessage(
+            "Upsh!!", "Tienes los campos vacios");
+      }
+
+      if (isLogin.contains(
+          "The password is invalid or the user does not have a password.")) {
+        _sharedController.showDialogMessage(
+            "Upsh!!", "Contraseña incorrecta. Verifica tus credenciales.");
+      }
+      if (isLogin.contains(
+          "There is no user record corresponding to this identifier. The user may have been deleted.")) {
+        _sharedController.showDialogMessage(
+            "Upsh!!", "Usuario no esta registrado. Verifica tus credenciales.");
+      }
     }
 
     _sharedController.setLoading(false);
   }
 
+  Future<Map<String, dynamic>> getDocumentById(String documentId) async {
+    try {
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(documentId)
+          .get();
+
+      if (documentSnapshot.exists) {
+        Object? dataUser = documentSnapshot.data();
+        if (dataUser is Map<String, dynamic>) {
+          dataMap = dataUser;
+          address_user.value = dataMap["addresses"];
+        }
+      }
+      return dataMap;
+    } on FirebaseException catch (e) {
+      log('Error de Firebase al obtener el documento: $e');
+      return dataMap;
+    } catch (e) {
+      log('Error al obtener el documento: $e');
+      return dataMap;
+    }
+  }
+
   // Iniciar sesión con correo electrónico y contraseña
-  Future<bool> signInWithEmailAndPassword() async {
+  Future<String> signInWithEmailAndPassword() async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: credentials.email,
@@ -54,12 +99,12 @@ class SessionController extends GetxController {
       );
       if (userCredential.user != null) {
         user = userCredential.user;
-        return true;
+        return 'true';
       }
-      return false;
-    } catch (e) {
+      return '';
+    } on FirebaseAuthException catch (e) {
       log('Error al iniciar sesión: $e');
-      return false;
+      return e.message ?? '';
     }
   }
 
@@ -80,7 +125,12 @@ class SessionController extends GetxController {
         _sharedController.setLoading(false);
       }
       _sharedController.setLoading(false);
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
+      if (e.message?.contains("Password should be at least 6 characters") ??
+          false) {
+        _sharedController.showDialogMessage(
+            "Upsh!!", "La Contraseña debe tenr minimo su caracteres");
+      }
       _sharedController.setLoading(false);
     }
   }
@@ -88,11 +138,11 @@ class SessionController extends GetxController {
   Future<void> completeRegister(model.User data) async {
     _sharedController.setLoading(true);
     try {
-      await _firestore.collection('users').doc(user?.uid).set(data.toMap());
+      await _firestore.collection('users').doc(user?.uid).set(data.toJson());
 
       _sharedController.showDialogMessage("Registro Completo",
           "Gracias ya suministro la informacion de registro");
-      _sharedController.setLoading(false);
+      await getDocumentById(user?.uid ?? '');
       Get.offAllNamed(HomePage.routeName);
     } catch (e) {
       _sharedController.setLoading(false);
@@ -115,5 +165,19 @@ class SessionController extends GetxController {
     signOut();
     Get.offAllNamed(LoginScreen.routeName);
     _sharedController.setLoading(false);
+  }
+
+  Future<void> updateListItem(String userUid) async {
+    try {
+      DocumentReference documentRef =
+          FirebaseFirestore.instance.collection('users').doc(userUid);
+
+      await documentRef.update({'addresses': address_user.toList()});
+
+      _sharedController.showDialogMessage(
+          "Direccion Agrega", "Direccion agregada con exito");
+    } on FirebaseException catch (e) {
+      print('Error al actualizar el elemento: $e');
+    }
   }
 }

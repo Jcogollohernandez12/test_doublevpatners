@@ -1,6 +1,5 @@
 import 'package:app_test/src/app/ui/controller/session_ctr.dart';
 import 'package:app_test/src/app/ui/view/login/login_view.dart';
-import 'package:app_test/src/app/ui/view/register/complete_register.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -60,7 +59,7 @@ class RegisterScreen extends StatelessWidget {
             "Practica",
             textAlign: TextAlign.center,
             style: GoogleFonts.sourceSansPro(
-                color: AppAssets.whiteColor,
+                color: AppAssets.tertiaryColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 40.0),
           ),
@@ -70,7 +69,7 @@ class RegisterScreen extends StatelessWidget {
             textStyle: GoogleFonts.sourceSansPro(
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
-                color: AppAssets.whiteColor),
+                color: AppAssets.blackColor),
           ),
           Obx(
             () => CustomTextFormField(
@@ -153,15 +152,18 @@ class RegisterScreen extends StatelessWidget {
                   color: AppAssets.tertiaryColor),
             ),
           ),
-          CustomButton(
-              label: "Registrar",
-              margin: const EdgeInsets.symmetric(vertical: 15.0),
-              constraints: const BoxConstraints(maxWidth: 300.0),
-              backgroundColor: AppAssets.blackColor,
-              onPressed: (_sharedController.findErrorMessage("email") != null ||
-                      _sharedController.findErrorMessage("password") != null)
-                  ? null
-                  : () => _screenController.createUser()),
+          Obx(
+            () => CustomButton(
+                label: "Registrar",
+                margin: const EdgeInsets.symmetric(vertical: 15.0),
+                constraints: const BoxConstraints(maxWidth: 300.0),
+                backgroundColor: AppAssets.blackColor,
+                onPressed: (_sharedController.findErrorMessage("email") !=
+                            null ||
+                        _sharedController.findErrorMessage("password") != null)
+                    ? null
+                    : () => _screenController.createUser()),
+          )
         ],
       ),
     ));
