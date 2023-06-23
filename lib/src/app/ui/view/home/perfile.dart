@@ -48,9 +48,9 @@ class PerfileUserView extends StatelessWidget {
                     _screenController.logOut();
                   },
                 )),
-            Obx(() => _sharedController.isLoading.value
-                ? buildLoadingIndicator()
-                : Container())
+            // Obx(() => _sharedController.isLoading.value
+            //     ? buildLoadingIndicator()
+            //     : Container())
           ],
         ),
       ],
